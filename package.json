@@ -1,0 +1,38 @@
+{
+  "name": "json2interface",
+  "version": "0.0.1",
+  "description": "Generate TypeScript interfaces from JSON data",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "test",
+    "build": "babel src -d lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michelefenu/json2interface.git"
+  },
+  "keywords": [
+    "JSON",
+    "TypeScript",
+    "interface"
+  ],
+  "author": "Michele Fenu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michelefenu/json2interface/issues"
+  },
+  "homepage": "https://github.com/michelefenu/json2interface#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.4",
+    "@babel/preset-env": "^7.11.0",
+    "prettier-standard": "^16.4.1",
+    "standard": "^14.3.4"
+  },
+  "standard": {
+    "ignore": [
+      "/lib/**"
+    ]
+  }
+}
