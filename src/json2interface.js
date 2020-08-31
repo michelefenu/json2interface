@@ -1,7 +1,7 @@
 /**
  * Parse a JSON string and returns a TypeScript interface representation
- * @param {*} jsonData a valid JSON string
- * @param {*} rootInterfaceName the name of the top level interface. Defaults to 'RootObject'
+ * @param {string} jsonData a valid JSON string
+ * @param {string} rootInterfaceName the name of the top level interface. Defaults to 'RootObject'
  */
 export function generate (jsonData, rootInterfaceName = 'RootObject') {
   let jsonObject = JSON.parse(jsonData)
@@ -26,8 +26,8 @@ export function generate (jsonData, rootInterfaceName = 'RootObject') {
 
 /**
  * Extract all jsonNodes to be remapped to a TypeScript interface
- * @param {*} jsonNode the jsonNode
- * @param {*} interfaces the interfaces array
+ * @param {object} jsonNode the jsonNode
+ * @param {object} interfaces the interfaces array
  */
 function _findAllInterfaces (jsonNode, interfaces) {
   Object.keys(jsonNode).forEach(key => {
@@ -45,8 +45,8 @@ function _findAllInterfaces (jsonNode, interfaces) {
 
 /**
  * Generates the TypeScript interface for a single level json object
- * @param {*} jsonNode a json object
- * @param {*} interfaceName the name of the interface mapping this node
+ * @param {object} jsonNode a json object
+ * @param {string} interfaceName the name of the interface mapping this node
  */
 function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
   const outputInterface = `export interface ${interfaceName} {\n`
@@ -62,8 +62,8 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
 
 /**
  * Returns the type of the value if it is a primitive type other than object. Otherwise, it returns the property name capitalized.
- * @param {*} propertyName the name of the property
- * @param {*} propertyValue the property value
+ * @param {string} propertyName the name of the property
+ * @param {any} propertyValue the property value
  */
 function _getType (propertyName, propertyValue) {
   if (_isPrimitiveType(propertyValue)) return typeof propertyValue
@@ -72,7 +72,7 @@ function _getType (propertyName, propertyValue) {
 
 /**
  * Returns the property name Capitalized
- * @param {*} propertyName the name of the property
+ * @param {string} propertyName the name of the property
  */
 function _getCustomTypeName (propertyName) {
   return propertyName.charAt(0).toUpperCase() + propertyName.slice(1)
@@ -80,7 +80,7 @@ function _getCustomTypeName (propertyName) {
 
 /**
  * Checks if the type of the param is a JavaScript primitive type or not
- * @param {*} value the value to be checked
+ * @param {any} value the value to be checked
  */
 function _isPrimitiveType (value) {
   return typeof value !== 'object'
