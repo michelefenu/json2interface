@@ -37,7 +37,7 @@ function _findAllInterfaces (jsonNode, interfaces) {
  * @param {*} interfaceName the name of the interface mapping this node
  */
 function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
-  const outputInterface = `interface ${interfaceName} {\n`
+  const outputInterface = `export interface ${interfaceName} {\n`
     .concat(
       Object.keys(jsonNode)
         .map(key => `  ${key}: ${_getType(key, jsonNode[key])};\n`)
