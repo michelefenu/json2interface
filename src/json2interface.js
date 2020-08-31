@@ -1,3 +1,8 @@
+/**
+ * Parse a JSON string and returns a TypeScript interface representation
+ * @param {*} jsonData a valid JSON string
+ * @param {*} rootInterfaceName the name of the top level interface. Defaults to 'RootObject'
+ */
 export function generate (jsonData, rootInterfaceName = 'RootObject') {
   let jsonObject = JSON.parse(jsonData)
 
@@ -9,14 +14,21 @@ export function generate (jsonData, rootInterfaceName = 'RootObject') {
     { interfaceName: rootInterfaceName, jsonNode: jsonObject }
   ])
 
-  return tsInterfaces.map(tsInterface =>
-    _mapJsonNodeToTypescriptInterface(
-      tsInterface.jsonNode,
-      tsInterface.interfaceName
+  return tsInterfaces
+    .map(tsInterface =>
+      _mapJsonNodeToTypescriptInterface(
+        tsInterface.jsonNode,
+        tsInterface.interfaceName
+      )
     )
-  ).join('')
+    .join('\n\n')
 }
 
+/**
+ * Extract all jsonNodes to be remapped to a TypeScript interface
+ * @param {*} jsonNode the jsonNode
+ * @param {*} interfaces the interfaces array
+ */
 function _findAllInterfaces (jsonNode, interfaces) {
   Object.keys(jsonNode).forEach(key => {
     if (!_isPrimitiveType(jsonNode[key])) {
@@ -43,7 +55,7 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
         .map(key => `  ${key}: ${_getType(key, jsonNode[key])};\n`)
         .join('')
     )
-    .concat('}\n\n')
+    .concat('}')
 
   return outputInterface
 }
