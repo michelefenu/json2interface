@@ -13,4 +13,4 @@ const interface = json2interface.generate(A_VALID_JSON)
 ```
 
 ## Contributing
-This is mostly a personal project but suggestions and pull requests are always welcome
+Issues and pull requests are always welcome
