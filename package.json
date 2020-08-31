@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Generate TypeScript interfaces from JSON data",
   "main": "index.js",
-  "private": true,
   "scripts": {
     "test": "npm run-script build && nyc jasmine",
     "build": "babel src -d lib"
