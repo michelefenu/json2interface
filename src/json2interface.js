@@ -33,7 +33,7 @@ function _findAllInterfaces (jsonNode, interfaces) {
   Object.keys(jsonNode).forEach(key => {
     if (!_isPrimitiveType(jsonNode[key])) {
       interfaces.push({
-        interfaceName: _getCustomTypeName(key),
+        interfaceName: _toPascalCase(key),
         jsonNode: jsonNode[key]
       })
       _findAllInterfaces(jsonNode[key], interfaces)
@@ -52,7 +52,7 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
   const outputInterface = `export interface ${interfaceName} {\n`
     .concat(
       Object.keys(jsonNode)
-        .map(key => `  ${key}: ${_getType(key, jsonNode[key])};\n`)
+        .map(key => `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`)
         .join('')
     )
     .concat('}')
@@ -67,15 +67,31 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
  */
 function _getType (propertyName, propertyValue) {
   if (_isPrimitiveType(propertyValue)) return typeof propertyValue
-  else return _getCustomTypeName(propertyName)
+  else return _toPascalCase(propertyName)
 }
 
 /**
- * Returns the property name Capitalized
- * @param {string} propertyName the name of the property
+ * Capitalizes a string. If the string is kebab-cased it will be converted to PascalCase.
+ * e.g. geographic-position -> GeographicPosition, user -> User
+ * @param {string} text the name of the property
  */
-function _getCustomTypeName (propertyName) {
-  return propertyName.charAt(0).toUpperCase() + propertyName.slice(1)
+function _toPascalCase (text) {
+  text = text.split('-')
+  return text.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join('')
+}
+
+/**
+ * If the string is kebab-cased it will be converted to camelCase.
+ * e.g. geographic-position -> geographicPosition, user -> user
+ * @param {string} text the name of the property
+ */
+function _toCamelCase (text) {
+  text = text.split('-')
+  return text
+    .map((value, index) =>
+      index === 0 ? value : value.charAt(0).toUpperCase() + value.slice(1)
+    )
+    .join('')
 }
 
 /**
