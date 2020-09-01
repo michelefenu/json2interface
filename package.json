@@ -1,6 +1,6 @@
 {
   "name": "json2interface",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Generate TypeScript interfaces from JSON data",
   "main": "index.js",
   "scripts": {
