@@ -1,4 +1,4 @@
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) ![CodeQL](https://github.com/michelefenu/json2interface/workflows/CodeQL/badge.svg?branch=master)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) ![CodeQL](https://github.com/michelefenu/json2interface/workflows/CodeQL/badge.svg?branch=master) ![Node.js Package](https://github.com/michelefenu/json2interface/workflows/Node.js%20Package/badge.svg)
 
 # JSON to TypeScript Interface
 A zero-dependencies package to generate TypeScript interfaces from JSON data
