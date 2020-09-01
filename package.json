@@ -18,7 +18,6 @@
   ],
   "author": "Michele Fenu",
   "license": "MIT",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "bugs": {
     "url": "https://github.com/michelefenu/json2interface/issues"
   },
