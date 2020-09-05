@@ -39,11 +39,14 @@ function _findAllInterfaces (jsonNode, interfaces) {
         clonedJsonNode[key] = clonedJsonNode[key][0] || []
       }
 
-      interfaces.push({
-        interfaceName: _toPascalCase(key),
-        jsonNode: clonedJsonNode[key]
-      })
-      _findAllInterfaces(clonedJsonNode[key], interfaces)
+      // The array does not contains primitive types
+      if (!_isPrimitiveType(clonedJsonNode[key])) {
+        interfaces.push({
+          interfaceName: _toPascalCase(key),
+          jsonNode: clonedJsonNode[key]
+        })
+        _findAllInterfaces(clonedJsonNode[key], interfaces)
+      }
     }
   })
 
@@ -75,9 +78,17 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
  * @param {any} propertyValue the property value
  */
 function _getType (propertyName, propertyValue) {
-  if (_isPrimitiveType(propertyValue)) return typeof propertyValue
-  else if(Array.isArray(propertyValue)) return `${_toPascalCase(propertyName)}[]`
-  else return _toPascalCase(propertyName)
+  if (_isPrimitiveType(propertyValue)) {
+    return typeof propertyValue
+  } else if (Array.isArray(propertyValue)) {
+    return `${
+      _isPrimitiveType(propertyValue[0])
+        ? typeof propertyValue[0]
+        : _toPascalCase(propertyName)
+    }[]`
+  } else {
+    return _toPascalCase(propertyName)
+  }
 }
 
 /**
