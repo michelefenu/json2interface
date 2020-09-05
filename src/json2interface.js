@@ -36,11 +36,14 @@ function _findAllInterfaces (jsonNode, interfaces) {
       const isArray = Array.isArray(clonedJsonNode[key])
 
       if (isArray) {
-        clonedJsonNode[key] = clonedJsonNode[key][0] || []
+        clonedJsonNode[key] = clonedJsonNode[key][0]
       }
 
-      // The array does not contains primitive types
-      if (!_isPrimitiveType(clonedJsonNode[key])) {
+      // The array does not contains only primitive types and the value is not null or undefined
+      if (
+        !_isPrimitiveType(clonedJsonNode[key]) &&
+        !_isNullOrUndefined(clonedJsonNode[key])
+      ) {
         interfaces.push({
           interfaceName: _toPascalCase(key),
           jsonNode: clonedJsonNode[key]
@@ -62,8 +65,10 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
   const outputInterface = `export interface ${interfaceName} {\n`
     .concat(
       Object.keys(jsonNode)
-        .map(
-          key => `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`
+        .map(key =>
+          !_isNullOrUndefined(jsonNode[key])
+            ? `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`
+            : `  ${_toCamelCase(key)}?: any\n`
         )
         .join('')
     )
@@ -121,6 +126,14 @@ function _toCamelCase (text) {
  */
 function _isPrimitiveType (value) {
   return typeof value !== 'object'
+}
+
+/**
+ * Checks if the type of the param is null or undefined
+ * @param {any} value the value to be checked
+ */
+function _isNullOrUndefined (value) {
+  return value === null || typeof value === 'undefined'
 }
 
 export default generate
