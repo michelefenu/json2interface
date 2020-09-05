@@ -30,13 +30,20 @@ export function generate (jsonData, rootInterfaceName = 'RootObject') {
  * @param {object} interfaces the interfaces array
  */
 function _findAllInterfaces (jsonNode, interfaces) {
-  Object.keys(jsonNode).forEach(key => {
-    if (!_isPrimitiveType(jsonNode[key])) {
+  const clonedJsonNode = JSON.parse(JSON.stringify(jsonNode))
+  Object.keys(clonedJsonNode).forEach(key => {
+    if (!_isPrimitiveType(clonedJsonNode[key])) {
+      const isArray = Array.isArray(clonedJsonNode[key])
+
+      if (isArray) {
+        clonedJsonNode[key] = clonedJsonNode[key][0] || []
+      }
+
       interfaces.push({
         interfaceName: _toPascalCase(key),
-        jsonNode: jsonNode[key]
+        jsonNode: clonedJsonNode[key]
       })
-      _findAllInterfaces(jsonNode[key], interfaces)
+      _findAllInterfaces(clonedJsonNode[key], interfaces)
     }
   })
 
@@ -52,7 +59,9 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
   const outputInterface = `export interface ${interfaceName} {\n`
     .concat(
       Object.keys(jsonNode)
-        .map(key => `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`)
+        .map(
+          key => `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`
+        )
         .join('')
     )
     .concat('}')
@@ -67,6 +76,7 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
  */
 function _getType (propertyName, propertyValue) {
   if (_isPrimitiveType(propertyValue)) return typeof propertyValue
+  else if(Array.isArray(propertyValue)) return `${_toPascalCase(propertyName)}[]`
   else return _toPascalCase(propertyName)
 }
 
