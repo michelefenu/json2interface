@@ -3,14 +3,17 @@
 # JSON to TypeScript Interface
 A zero-dependencies package to generate TypeScript interfaces from JSON data
 
-## Installation
+### Installation
 `npm install json2interface`
 
-## Usage
+### Usage
 ```
 const json2interface = require('json2interface')
 const interface = json2interface.generate(A_VALID_JSON)
 ```
 
-## Contributing
+### Known "bugs"
+- A trailing comma will make your JSON invalid
+
+### Contributing
 Issues and pull requests are always welcome
