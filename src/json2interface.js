@@ -6,22 +6,15 @@
 export function generate (jsonData, rootInterfaceName = 'RootObject') {
   let jsonObject = JSON.parse(jsonData)
 
-  if (Array.isArray(jsonObject) && jsonObject.length) {
+  if (_isArray(jsonObject) && jsonObject.length) {
     jsonObject = jsonObject[0]
   }
 
-  const tsInterfaces = _findAllInterfaces(jsonObject, [
-    { interfaceName: rootInterfaceName, jsonNode: jsonObject }
-  ])
+  const result = []
 
-  return tsInterfaces
-    .map(tsInterface =>
-      _mapJsonNodeToTypescriptInterface(
-        tsInterface.jsonNode,
-        tsInterface.interfaceName
-      )
-    )
-    .join('\n\n')
+  _findAllInterfaces(jsonObject, rootInterfaceName, result)
+
+  return result.join('\n\n')
 }
 
 /**
@@ -29,31 +22,28 @@ export function generate (jsonData, rootInterfaceName = 'RootObject') {
  * @param {object} jsonNode the jsonNode
  * @param {object} interfaces the interfaces array
  */
-function _findAllInterfaces (jsonNode, interfaces) {
-  const clonedJsonNode = JSON.parse(JSON.stringify(jsonNode))
-  Object.keys(clonedJsonNode).forEach(key => {
-    if (!_isPrimitiveType(clonedJsonNode[key])) {
-      const isArray = Array.isArray(clonedJsonNode[key])
+function _findAllInterfaces (jsonNode, interfaceName, result) {
+  result.push(_mapJsonNodeToTypescriptInterface(jsonNode, interfaceName))
+
+  Object.keys(jsonNode).forEach(key => {
+    if (!_isPrimitiveType(jsonNode[key])) {
+      const isArray = _isArray(jsonNode[key])
 
       if (isArray) {
-        clonedJsonNode[key] = clonedJsonNode[key][0]
+        jsonNode[key] = jsonNode[key][0]
       }
 
       // The array does not contains only primitive types and the value is not null or undefined
       if (
-        !_isPrimitiveType(clonedJsonNode[key]) &&
-        !_isNullOrUndefined(clonedJsonNode[key])
+        !_isPrimitiveType(jsonNode[key]) &&
+        !_isNullOrUndefined(jsonNode[key])
       ) {
-        interfaces.push({
-          interfaceName: _toPascalCase(key),
-          jsonNode: clonedJsonNode[key]
-        })
-        _findAllInterfaces(clonedJsonNode[key], interfaces)
+        _findAllInterfaces(jsonNode[key], _toPascalCase(key), result)
       }
     }
   })
 
-  return interfaces
+  return jsonNode
 }
 
 /**
@@ -78,14 +68,15 @@ function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
 }
 
 /**
- * Returns the type of the value if it is a primitive type other than object. Otherwise, it returns the property name capitalized.
+ * Returns the TypeScript type of the value
+ * e.g. string, number, string[] or CustomType[]
  * @param {string} propertyName the name of the property
  * @param {any} propertyValue the property value
  */
 function _getType (propertyName, propertyValue) {
   if (_isPrimitiveType(propertyValue)) {
     return typeof propertyValue
-  } else if (Array.isArray(propertyValue)) {
+  } else if (_isArray(propertyValue)) {
     return `${
       _isPrimitiveType(propertyValue[0])
         ? typeof propertyValue[0]
@@ -126,6 +117,14 @@ function _toCamelCase (text) {
  */
 function _isPrimitiveType (value) {
   return typeof value !== 'object'
+}
+
+/**
+ * Checks if the type of the param is a JavaScript Array
+ * @param {any} value the value to be checked
+ */
+function _isArray (value) {
+  return typeof value === 'object' && Array.isArray(value)
 }
 
 /**
