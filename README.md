@@ -14,7 +14,6 @@ const interface = json2interface.generate(A_VALID_JSON)
 
 ### Known "bugs"
 - A trailing comma will make your JSON invalid
-- Different unrelated properties with the same name will be mapped to the same interface name
 
 ### Contributing
 Issues and pull requests are always welcome
