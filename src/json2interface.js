@@ -116,7 +116,6 @@ function _getArrayTypeAndNode (arr, propertyName) {
       typeName.unshift('any')
       break
     case PROPERTY_TYPE.CustomObject:
-      console.log('wewew')
       typeName.unshift(_getValidName(_toPascalCase(propertyName)))
       break
   }
