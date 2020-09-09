@@ -45,6 +45,13 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
         })
         break
       case PROPERTY_TYPE.Array:
+        const { typeName, value } = _getArrayTypeAndNode(jsonNode[key], key)
+        currentInterface.properties.push({
+          name: _toCamelCase(key),
+          type: typeName
+        })
+
+        _getTypeScriptInterfaces(value, _toPascalCase(key))
         break
 
       case PROPERTY_TYPE.NullOrUndefined:
@@ -66,6 +73,35 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
   })
 
   interfaces.push(currentInterface)
+}
+
+/**
+ * Returns TypeScript type name and inner node of an array
+ * @param {object} arr
+ */
+function _getArrayTypeAndNode (arr, propertyName) {
+  const typeName = []
+
+  while (_isArray(arr)) {
+    typeName.unshift('[]')
+    arr = arr[0]
+  }
+
+  switch (_getType(arr)) {
+    case PROPERTY_TYPE.Primitive:
+      typeName.unshift(_toPascalCase(typeof arr))
+      break
+    case PROPERTY_TYPE.NullOrUndefined:
+      typeName.unshift('any')
+      break
+    case PROPERTY_TYPE.Object:
+      typeName.unshift(_toPascalCase(propertyName))
+      break
+  }
+
+  console.log(typeName)
+
+  return { typeName: typeName.join(''), value: arr }
 }
 
 /**

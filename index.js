@@ -100,11 +100,19 @@ result = json2interface.generate(
       },
       phone: '1-770-736-8031 x56442',
       website: null,
-      company: [{
-        name: 'Romaguera-Crona',
-        catchPhrase: 'Multi-layered client-server neural-net',
-        bs: 'harness real-time e-markets'
-      }]
+      company: [
+        [
+          {
+            facilities: [
+              {
+                name: 'Romaguera-Crona',
+                catchPhrase: 'Multi-layered client-server neural-net',
+                bs: 'harness real-time e-markets'
+              }
+            ]
+          }
+        ]
+      ]
     }
   ])
 )
