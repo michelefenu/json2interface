@@ -35,6 +35,9 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
   }
 
   const currentInterface = { name: interfaceName, properties: [] }
+  interfaces.push(currentInterface)
+
+  let typeName, value
 
   Object.keys(jsonNode).map(key => {
     switch (_getType(jsonNode[key])) {
@@ -45,13 +48,17 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
         })
         break
       case PROPERTY_TYPE.Array:
-        const { typeName, value } = _getArrayTypeAndNode(jsonNode[key], key)
+        ;({ typeName, value } = _getArrayTypeAndNode(jsonNode[key], key))
+
         currentInterface.properties.push({
           name: _toCamelCase(key),
           type: typeName
         })
 
-        _getTypeScriptInterfaces(value, _toPascalCase(key))
+        _getTypeScriptInterfaces(
+          value,
+          _toPascalCase(typeName.replace(/\[\]/g, ''))
+        )
         break
 
       case PROPERTY_TYPE.NullOrUndefined:
@@ -64,15 +71,26 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
       case PROPERTY_TYPE.Object:
         currentInterface.properties.push({
           name: _toCamelCase(key),
-          type: _toPascalCase(key)
+          type: _toPascalCase(_getValidName(key))
         })
 
-        _getTypeScriptInterfaces(jsonNode[key], _toPascalCase(key))
+        _getTypeScriptInterfaces(
+          jsonNode[key],
+          _toPascalCase(_getValidName(key))
+        )
         break
     }
   })
+}
 
-  interfaces.push(currentInterface)
+function _getValidName (interfaceName) {
+  const numberOfSameNameInterfaces = interfaces.filter(
+    x => x.name?.toUpperCase() === interfaceName.toUpperCase()
+  ).length
+
+  return numberOfSameNameInterfaces
+    ? `${interfaceName}${numberOfSameNameInterfaces + 1}`
+    : interfaceName
 }
 
 /**
@@ -95,11 +113,9 @@ function _getArrayTypeAndNode (arr, propertyName) {
       typeName.unshift('any')
       break
     case PROPERTY_TYPE.Object:
-      typeName.unshift(_toPascalCase(propertyName))
+      typeName.unshift(_getValidName(_toPascalCase(propertyName)))
       break
   }
-
-  console.log(typeName)
 
   return { typeName: typeName.join(''), value: arr }
 }
