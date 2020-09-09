@@ -5,30 +5,30 @@ const PROPERTY_TYPE = {
   NullOrUndefined: 'NullOrUndefined'
 }
 
-const interfaces = []
+let interfaces
 
 /**
  * Parse a JSON string and returns a TypeScript interface representation
  * @param {string} jsonData a valid JSON string
  * @param {string} rootInterfaceName the name of the top level interface. Defaults to 'RootObject'
  */
-export function generate (jsonData, rootInterfaceName = 'RootObject') {
+export function generate(jsonData, rootInterfaceName = 'RootObject') {
+  interfaces = []
   const jsonNode = JSON.parse(jsonData)
 
   _getTypeScriptInterfaces(jsonNode, rootInterfaceName)
 
   return interfaces
     .map(tsInterface => {
-      return `export interface ${
-        tsInterface.name
-      } {\n${tsInterface.properties
-        .map(prop => `  ${prop.name}: ${prop.type}`)
-        .join('\n')}\n}`
+      return `export interface ${tsInterface.name
+        } {\n${tsInterface.properties
+          .map(prop => `  ${prop.name}: ${prop.type}`)
+          .join('\n')}\n}`
     })
     .join('\n\n')
 }
 
-function _getTypeScriptInterfaces (jsonNode, interfaceName) {
+function _getTypeScriptInterfaces(jsonNode, interfaceName) {
   if (_isArray(jsonNode)) {
     _getTypeScriptInterfaces(jsonNode[0], interfaceName)
     return
@@ -48,7 +48,7 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
         })
         break
       case PROPERTY_TYPE.Array:
-        ;({ typeName, value } = _getArrayTypeAndNode(jsonNode[key], key))
+        ; ({ typeName, value } = _getArrayTypeAndNode(jsonNode[key], key))
 
         currentInterface.properties.push({
           name: _toCamelCase(key),
@@ -83,7 +83,7 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
   })
 }
 
-function _getValidName (interfaceName) {
+function _getValidName(interfaceName) {
   const numberOfSameNameInterfaces = interfaces.filter(
     x => x.name?.toUpperCase() === interfaceName.toUpperCase()
   ).length
@@ -97,7 +97,7 @@ function _getValidName (interfaceName) {
  * Returns TypeScript type name and inner node of an array
  * @param {object} arr
  */
-function _getArrayTypeAndNode (arr, propertyName) {
+function _getArrayTypeAndNode(arr, propertyName) {
   const typeName = []
 
   while (_isArray(arr)) {
@@ -124,7 +124,7 @@ function _getArrayTypeAndNode (arr, propertyName) {
  * Returns the type of the value
  * @param {string} value a JavaScript value
  */
-function _getType (value) {
+function _getType(value) {
   if (_isPrimitive(value)) {
     return PROPERTY_TYPE.Primitive
   } else if (_isNullOrUndefined(value)) {
@@ -142,7 +142,7 @@ function _getType (value) {
  * Checks if the type of the param is a JavaScript primitive type or not
  * @param {any} value the value to be checked
  */
-function _isPrimitive (value) {
+function _isPrimitive(value) {
   return typeof value !== 'object'
 }
 
@@ -150,7 +150,7 @@ function _isPrimitive (value) {
  * Checks if the type of the param is a JavaScript Array
  * @param {any} value the value to be checked
  */
-function _isArray (value) {
+function _isArray(value) {
   return typeof value === 'object' && Array.isArray(value)
 }
 
@@ -158,7 +158,7 @@ function _isArray (value) {
  * Checks if the type of the param is a custom Object
  * @param {any} value the value to be checked
  */
-function _isCustomObject (value) {
+function _isCustomObject(value) {
   return (
     typeof value === 'object' && _isArray(value) && _isNullOrUndefined(value)
   )
@@ -168,7 +168,7 @@ function _isCustomObject (value) {
  * Checks if the type of the param is null or undefined
  * @param {any} value the value to be checked
  */
-function _isNullOrUndefined (value) {
+function _isNullOrUndefined(value) {
   return value === null || typeof value === 'undefined'
 }
 
@@ -177,7 +177,7 @@ function _isNullOrUndefined (value) {
  * e.g. geographic-position -> GeographicPosition, user -> User
  * @param {string} text the name of the property
  */
-function _toPascalCase (text) {
+function _toPascalCase(text) {
   text = text.split('-')
   return text.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join('')
 }
@@ -187,7 +187,7 @@ function _toPascalCase (text) {
  * e.g. geographic-position -> geographicPosition, user -> user
  * @param {string} text the name of the property
  */
-function _toCamelCase (text) {
+function _toCamelCase(text) {
   text = text.split('-')
   return text
     .map((value, index) =>
