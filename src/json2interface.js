@@ -1,90 +1,123 @@
+const PROPERTY_TYPE = {
+  Primitive: 'Primitive',
+  CustomObject: 'Object',
+  Array: 'Array',
+  NullOrUndefined: 'NullOrUndefined'
+}
+
+const interfaces = []
+
 /**
  * Parse a JSON string and returns a TypeScript interface representation
  * @param {string} jsonData a valid JSON string
  * @param {string} rootInterfaceName the name of the top level interface. Defaults to 'RootObject'
  */
 export function generate (jsonData, rootInterfaceName = 'RootObject') {
-  let jsonObject = JSON.parse(jsonData)
+  const jsonNode = JSON.parse(jsonData)
 
-  if (_isArray(jsonObject) && jsonObject.length) {
-    jsonObject = jsonObject[0]
-  }
+  _getTypeScriptInterfaces(jsonNode, rootInterfaceName)
 
-  const result = []
-
-  _findAllInterfaces(jsonObject, rootInterfaceName, result)
-
-  return result.join('\n\n')
+  return interfaces
+    .map(tsInterface => {
+      return `export interface ${
+        tsInterface.name
+      } {\n${tsInterface.properties
+        .map(prop => `  ${prop.name}: ${prop.type}`)
+        .join('\n')}\n}`
+    })
+    .join('\n\n')
 }
 
-/**
- * Extract all jsonNodes to be remapped to a TypeScript interface
- * @param {object} jsonNode the jsonNode
- * @param {object} interfaces the interfaces array
- */
-function _findAllInterfaces (jsonNode, interfaceName, result) {
-  result.push(_mapJsonNodeToTypescriptInterface(jsonNode, interfaceName))
+function _getTypeScriptInterfaces (jsonNode, interfaceName) {
+  if (_isArray(jsonNode)) {
+    _getTypeScriptInterfaces(jsonNode[0], interfaceName)
+    return
+  }
 
-  Object.keys(jsonNode).forEach(key => {
-    if (!_isPrimitiveType(jsonNode[key])) {
-      const isArray = _isArray(jsonNode[key])
+  const currentInterface = { name: interfaceName, properties: [] }
 
-      if (isArray) {
-        jsonNode[key] = jsonNode[key][0]
-      }
+  Object.keys(jsonNode).map(key => {
+    switch (_getType(jsonNode[key])) {
+      case PROPERTY_TYPE.Primitive:
+        currentInterface.properties.push({
+          name: _toCamelCase(key),
+          type: typeof jsonNode[key]
+        })
+        break
+      case PROPERTY_TYPE.Array:
+        break
 
-      // The array does not contains only primitive types and the value is not null or undefined
-      if (
-        !_isPrimitiveType(jsonNode[key]) &&
-        !_isNullOrUndefined(jsonNode[key])
-      ) {
-        _findAllInterfaces(jsonNode[key], _toPascalCase(key), result)
-      }
+      case PROPERTY_TYPE.NullOrUndefined:
+        currentInterface.properties.push({
+          name: `${_toCamelCase(key)}?`,
+          type: 'any'
+        })
+        break
+
+      case PROPERTY_TYPE.Object:
+        currentInterface.properties.push({
+          name: _toCamelCase(key),
+          type: _toPascalCase(key)
+        })
+
+        _getTypeScriptInterfaces(jsonNode[key], _toPascalCase(key))
+        break
     }
   })
 
-  return jsonNode
+  interfaces.push(currentInterface)
 }
 
 /**
- * Generates the TypeScript interface for a single level json object
- * @param {object} jsonNode a json object
- * @param {string} interfaceName the name of the interface mapping this node
+ * Returns the type of the value
+ * @param {string} value a JavaScript value
  */
-function _mapJsonNodeToTypescriptInterface (jsonNode, interfaceName) {
-  const outputInterface = `export interface ${interfaceName} {\n`
-    .concat(
-      Object.keys(jsonNode)
-        .map(key =>
-          !_isNullOrUndefined(jsonNode[key])
-            ? `  ${_toCamelCase(key)}: ${_getType(key, jsonNode[key])};\n`
-            : `  ${_toCamelCase(key)}?: any\n`
-        )
-        .join('')
-    )
-    .concat('}')
-
-  return outputInterface
-}
-
-/**
- * Returns the TypeScript type of the value
- * e.g. string, number, string[] or CustomType[]
- * @param {string} propertyName the name of the property
- * @param {any} propertyValue the property value
- */
-function _getType (propertyName, propertyValue) {
-  if (_isPrimitiveType(propertyValue)) {
-    return typeof propertyValue
-  } else if (_isArray(propertyValue)) {
-    return `${
-      _isPrimitiveType(propertyValue[0])
-        ? typeof propertyValue[0]
-        : _toPascalCase(propertyName)
-    }[]`
+function _getType (value) {
+  if (_isPrimitive(value)) {
+    return PROPERTY_TYPE.Primitive
+  } else if (_isNullOrUndefined(value)) {
+    return PROPERTY_TYPE.NullOrUndefined
+  } else if (_isArray(value)) {
+    return PROPERTY_TYPE.Array
+  } else if (_isCustomObject(value)) {
+    return PROPERTY_TYPE.CustomObject
   } else {
-    return _toPascalCase(propertyName)
+    // no way to get there
   }
+}
+
+/**
+ * Checks if the type of the param is a JavaScript primitive type or not
+ * @param {any} value the value to be checked
+ */
+function _isPrimitive (value) {
+  return typeof value !== 'object'
+}
+
+/**
+ * Checks if the type of the param is a JavaScript Array
+ * @param {any} value the value to be checked
+ */
+function _isArray (value) {
+  return typeof value === 'object' && Array.isArray(value)
+}
+
+/**
+ * Checks if the type of the param is a custom Object
+ * @param {any} value the value to be checked
+ */
+function _isCustomObject (value) {
+  return (
+    typeof value === 'object' && _isArray(value) && _isNullOrUndefined(value)
+  )
+}
+
+/**
+ * Checks if the type of the param is null or undefined
+ * @param {any} value the value to be checked
+ */
+function _isNullOrUndefined (value) {
+  return value === null || typeof value === 'undefined'
 }
 
 /**
@@ -109,30 +142,6 @@ function _toCamelCase (text) {
       index === 0 ? value : value.charAt(0).toUpperCase() + value.slice(1)
     )
     .join('')
-}
-
-/**
- * Checks if the type of the param is a JavaScript primitive type or not
- * @param {any} value the value to be checked
- */
-function _isPrimitiveType (value) {
-  return typeof value !== 'object'
-}
-
-/**
- * Checks if the type of the param is a JavaScript Array
- * @param {any} value the value to be checked
- */
-function _isArray (value) {
-  return typeof value === 'object' && Array.isArray(value)
-}
-
-/**
- * Checks if the type of the param is null or undefined
- * @param {any} value the value to be checked
- */
-function _isNullOrUndefined (value) {
-  return value === null || typeof value === 'undefined'
 }
 
 export default generate
