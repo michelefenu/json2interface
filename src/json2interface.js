@@ -29,6 +29,11 @@ export function generate (jsonData, rootInterfaceName = 'RootObject') {
     .join('\n\n')
 }
 
+/**
+ * Recursively generates interfaces from a root JSON node
+ * @param {object} jsonNode a json to generate interface from
+ * @param {string} interfaceName the name for the current interface
+ */
 function _getTypeScriptInterfaces (jsonNode, interfaceName) {
   if (_isArray(jsonNode)) {
     _getTypeScriptInterfaces(jsonNode[0], interfaceName)
@@ -42,17 +47,19 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
 
   Object.keys(jsonNode).map(key => {
     switch (_getType(jsonNode[key])) {
+
       case PROPERTY_TYPE.Primitive:
         currentInterface.properties.push({
-          name: _toCamelCase(key),
+          name: _toSafeKey(key),
           type: typeof jsonNode[key]
         })
         break
+
       case PROPERTY_TYPE.Array:
         ;({ typeName, value } = _getArrayTypeAndNode(jsonNode[key], key))
 
         currentInterface.properties.push({
-          name: _toCamelCase(key),
+          name: _toSafeKey(key),
           type: typeName
         })
 
@@ -66,14 +73,14 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
 
       case PROPERTY_TYPE.NullOrUndefined:
         currentInterface.properties.push({
-          name: `${_toCamelCase(key)}?`,
+          name: `${_toSafeKey(key)}?`,
           type: 'any'
         })
         break
 
       case PROPERTY_TYPE.CustomObject:
         currentInterface.properties.push({
-          name: _toCamelCase(key),
+          name: _toSafeKey(key),
           type: _toPascalCase(_getValidName(key))
         })
 
@@ -86,6 +93,10 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
   })
 }
 
+/**
+ * Gets a valid interface name. If another interface with the same name exists it will return existingInterface2, existingInterface3 and so on
+ * @param {string} interfaceName
+ */
 function _getValidName (interfaceName) {
   const numberOfSameNameInterfaces = interfaces.filter(
     x => x.name?.toUpperCase() === interfaceName.toUpperCase()
@@ -186,17 +197,15 @@ function _toPascalCase (text) {
 }
 
 /**
- * If the string is kebab-cased it will be converted to camelCase.
- * e.g. geographic-position -> geographicPosition, user -> user
+ * If the string is kebab-cased it will be wrapped in single quotes.
  * @param {string} text the name of the property
  */
-function _toCamelCase (text) {
-  text = text.split('-')
-  return text
-    .map((value, index) =>
-      index === 0 ? value : value.charAt(0).toUpperCase() + value.slice(1)
-    )
-    .join('')
+function _toSafeKey (text) {
+  if (text.split('-').length > 1) {
+    return `'${text}'`
+  } else {
+    return text
+  }
 }
 
 export default generate
