@@ -12,7 +12,7 @@ const json2interface = require('json2interface')
 const interface = json2interface.generate(A_VALID_JSON)
 ```
 
-### Known "bugs"
+### Known issues
 - A trailing comma will make your JSON invalid
 
 ### Contributing
