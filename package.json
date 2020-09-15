@@ -1,8 +1,9 @@
 {
   "name": "json2interface",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Generate TypeScript interfaces from JSON data",
-  "main": "index.js",
+  "main": "./lib/json2interface.js",
+  "types": "./lib/json2interface.d.ts",
   "scripts": {
     "test": "npm run-script build && nyc jasmine",
     "build": "babel src -d lib"
