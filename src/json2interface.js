@@ -99,7 +99,7 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
  */
 function _getValidName (interfaceName) {
   const numberOfSameNameInterfaces = interfaces.filter(
-    x => _toSafeKey(x.name?.toUpperCase()) === _toSafeKey(interfaceName.toUpperCase())
+    x => x.name?.toUpperCase() === interfaceName.replace(/-+|@+|\/+/mg, '').toUpperCase()
   ).length
 
   return numberOfSameNameInterfaces
