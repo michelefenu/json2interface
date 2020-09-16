@@ -99,7 +99,7 @@ function _getTypeScriptInterfaces (jsonNode, interfaceName) {
  */
 function _getValidName (interfaceName) {
   const numberOfSameNameInterfaces = interfaces.filter(
-    x => x.name?.toUpperCase() === interfaceName.toUpperCase()
+    x => _toSafeKey(x.name?.toUpperCase()) === _toSafeKey(interfaceName.toUpperCase())
   ).length
 
   return numberOfSameNameInterfaces
@@ -201,7 +201,9 @@ function _toPascalCase (text) {
  * @param {string} text the name of the property
  */
 function _toSafeKey (text) {
-  if (text.split('-').length > 1) {
+  const containsIllegalChars = text.match(/-+|@+|\/+/mg)
+
+  if (containsIllegalChars) {
     return `'${text}'`
   } else {
     return text
