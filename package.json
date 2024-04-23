@@ -1,6 +1,6 @@
 {
   "name": "json2interface",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Generate TypeScript interfaces from JSON data",
   "main": "index.js",
   "types": "./lib/json2interface.d.ts",
