@@ -1,1 +1,2 @@
-export function generate(s: string): string;
+export function generate(jsonData: string, rootInterfaceName?: string): string;
+export default generate;
