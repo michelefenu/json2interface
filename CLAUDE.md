@@ -13,11 +13,13 @@ There is no separate lint command in package.json; the project uses StandardJS s
 
 To run a single test: Jasmine does not support per-test filtering via CLI in this setup — add a focused `fit(...)` or `fdescribe(...)` in the spec file temporarily.
 
+**Important**: the spec file imports from `../lib/json2interface` (compiled output), not from `src/`. Running `nyc jasmine` without a prior `npm run build` tests the previous build. Always use `npm test` (which runs build first) or run `npm run build` manually before `nyc jasmine`.
+
 ## Architecture
 
 The library is a single-file algorithm (`src/json2interface.js`) that converts a JSON string into TypeScript interface definitions.
 
-**Entry point**: `generate(jsonData, rootInterfaceName?)` — parses JSON, creates a context object, calls `_processNode()`, and returns a multi-line string of `export interface` blocks.
+**Entry point**: `generate(jsonData, rootInterfaceName?)` — parses JSON, creates a context object, calls `_processNode()`, and returns a multi-line string of `export interface` blocks. Accepts both JSON objects and JSON arrays at the root level.
 
 **Context object**: `{ interfaces: [], seenShapes: Map }` — passed through all recursive calls instead of module-level mutable state. `interfaces` collects emitted interfaces; `seenShapes` maps shape fingerprints to interface names for deduplication.
 
